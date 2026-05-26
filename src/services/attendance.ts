@@ -8,13 +8,21 @@ export type AttendanceResponse = {
   distance: string;
   data?: {
     location_type: string;
-    location_id: string;
+    location_id: number;
     location_name: string;
     allowed_radius: number;
     distance: number;
+    withinRadius: boolean;
+    geofenceEnforced: boolean;
     matching_rule: string;
+    office?: {
+      locationId: number;
+      name: string;
+      radius: number;
+    };
     address?: string;
   };
+  shift?: any | null;
 };
 
 export const punchIn = async (
