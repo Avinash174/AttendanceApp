@@ -1,29 +1,68 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_ENDPOINTS } from '../config/api';
-import { AuthSession, LoginCredentials, LoginResponse } from '../types/auth';
+import { AuthSession, AuthUser, LoginCredentials, LoginResponse } from '../types/auth';
 import { apiRequest, ApiError } from './apiClient';
 import { logApiError } from './logger';
 
 const AUTH_SESSION_KEY = '@attendance/auth-session';
 
-const isAuthSession = (value: unknown): value is AuthSession => {
+export const normalizeAuthUser = (raw: Record<string, unknown>): AuthUser => ({
+  pkUserId: String(raw.pkUserId ?? ''),
+  UserName: String(raw.UserName ?? ''),
+  Password: raw.Password ? String(raw.Password) : undefined,
+  Answer: raw.Answer == null ? null : String(raw.Answer),
+  Sync: String(raw.Sync ?? ''),
+  SysDefined: raw.SysDefined as string | boolean,
+  DateTimeStamp: String(raw.DateTimeStamp ?? ''),
+  fkUserId: String(raw.fkUserId ?? ''),
+  LastStatus: String(raw.LastStatus ?? ''),
+  fkECId: raw.fkECId == null ? null : String(raw.fkECId),
+  OwnRecords: raw.OwnRecords as string | boolean,
+  OtherRecords: raw.OtherRecords as string | boolean,
+  Mobile: String(raw.Mobile ?? raw.Phone ?? ''),
+  fkEmpId: Number(raw.fkEmpId) || 0,
+  ProfileImage: raw.ProfileImage == null ? null : String(raw.ProfileImage),
+  Email: raw.Email == null ? null : String(raw.Email),
+  Phone: raw.Phone == null ? null : String(raw.Phone),
+  GeofencePoint: raw.GeofencePoint == null ? null : String(raw.GeofencePoint),
+  AttendanceMode: raw.AttendanceMode ? String(raw.AttendanceMode) : undefined,
+  fkLocationId:
+    raw.fkLocationId == null || raw.fkLocationId === ''
+      ? null
+      : (raw.fkLocationId as string | number),
+});
+
+const normalizeAuthSession = (value: unknown): AuthSession | null => {
   if (!value || typeof value !== 'object') {
-    return false;
+    return null;
   }
 
-  const session = value as Partial<AuthSession>;
-  return Boolean(
-    session.token &&
-      session.refreshToken &&
-      session.user &&
-      typeof session.user === 'object' &&
-      session.user.UserName,
-  );
+  const session = value as Partial<AuthSession> & { user?: Record<string, unknown> };
+
+  if (!session.token || !session.refreshToken || !session.user) {
+    return null;
+  }
+
+  const user =
+    typeof session.user === 'object' && session.user !== null && 'UserName' in session.user
+      ? normalizeAuthUser(session.user as Record<string, unknown>)
+      : null;
+
+  if (!user?.UserName) {
+    return null;
+  }
+
+  return {
+    token: session.token,
+    refreshToken: session.refreshToken,
+    role: session.role,
+    user,
+  };
 };
 
 export const saveAuthSession = async (session: AuthSession) => {
   await AsyncStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
-  if (session.user.fkEmpId !== undefined && session.user.fkEmpId !== null) {
+  if (session.user.fkEmpId) {
     await AsyncStorage.setItem('@attendance/fk-emp-id', session.user.fkEmpId.toString());
   }
 };
@@ -37,14 +76,15 @@ export const getAuthSession = async (): Promise<AuthSession | null> => {
 
   try {
     const parsedSession = JSON.parse(storedSession);
+    const session = normalizeAuthSession(parsedSession);
 
-    if (!isAuthSession(parsedSession)) {
+    if (!session) {
       await AsyncStorage.removeItem(AUTH_SESSION_KEY);
       await AsyncStorage.removeItem('@attendance/fk-emp-id');
       return null;
     }
 
-    return parsedSession;
+    return session;
   } catch (error) {
     logApiError('auth-session', 'Failed to parse stored session', error);
     await AsyncStorage.removeItem(AUTH_SESSION_KEY);
@@ -65,28 +105,31 @@ export const getStoredFkEmpId = async (): Promise<number | null> => {
     return isNaN(parsed) ? null : parsed;
   }
 
-  // Fallback to active session
   const session = await getAuthSession();
-  return session?.user?.fkEmpId ?? null;
+  return session?.user?.fkEmpId || null;
 };
 
 export const loginWithCredentials = async (
   credentials: LoginCredentials,
 ): Promise<AuthSession> => {
-  const username = credentials.UserName.trim();
+  const email = credentials.Email.trim();
   const password = credentials.Password.trim();
 
-  if (!username || !password) {
-    throw new ApiError('Enter both username and password.');
+  if (!email || !password) {
+    throw new ApiError('Enter both email and password.');
   }
+
+  const normalized = email.replace(/\s/g, '');
+  const isMobileLogin = /^\+?\d{10,15}$/.test(normalized);
+
+  const body = isMobileLogin
+    ? { mobile: normalized, password }
+    : { email: normalized, password };
 
   try {
     const response = await apiRequest<LoginResponse>(API_ENDPOINTS.login, {
       method: 'POST',
-      body: {
-        username: username,
-        password: password,
-      },
+      body,
     });
 
     if (!response?.success) {
@@ -97,10 +140,17 @@ export const loginWithCredentials = async (
       throw new ApiError('Login response is missing required authentication data.');
     }
 
+    const user = normalizeAuthUser(response.user);
+
+    if (!user.UserName || !user.fkEmpId) {
+      throw new ApiError('Login response is missing employee details.');
+    }
+
     const session: AuthSession = {
       token: response.token,
       refreshToken: response.refreshToken,
-      user: response.user,
+      role: response.role,
+      user,
     };
 
     await saveAuthSession(session);

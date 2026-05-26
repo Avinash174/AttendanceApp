@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import { API_ENDPOINTS } from '../config/api';
 import { apiRequest } from './apiClient';
 import { getAuthSession, saveAuthSession } from './auth';
+import type { AuthSession } from '../types/auth';
 
 export type EmployeeProfile = {
   pkUserId: string;
@@ -24,6 +25,15 @@ export type UpdateEmployeeProfilePayload = Partial<{
   profileImageUrl: string | null;
 }>;
 
+export const getProfileFromAuthSession = (session: AuthSession): EmployeeProfile => ({
+  pkUserId: session.user.pkUserId,
+  userName: session.user.UserName,
+  fkEmpId: session.user.fkEmpId,
+  email: session.user.Email,
+  phone: session.user.Phone ?? session.user.Mobile,
+  profileImageUrl: session.user.ProfileImage,
+});
+
 export const getEmployeeProfile = async (): Promise<EmployeeProfile> => {
   const session = await getAuthSession();
 
@@ -37,23 +47,27 @@ export const getEmployeeProfile = async (): Promise<EmployeeProfile> => {
     throw new Error('Employee ID is missing from the login session.');
   }
 
-  const response = await apiRequest<ProfileResponse>(API_ENDPOINTS.profile(fkEmpId), {
-    method: 'GET',
-    token: session.token,
-  });
+  try {
+    const response = await apiRequest<ProfileResponse>(API_ENDPOINTS.profile(fkEmpId), {
+      method: 'GET',
+      token: session.token,
+    });
 
-  if (!response.success || !response.profile) {
-    throw new Error('Unable to load employee profile.');
+    if (!response.success || !response.profile) {
+      return getProfileFromAuthSession(session);
+    }
+
+    // Sync to local session
+    session.user.UserName = response.profile.userName;
+    session.user.Email = response.profile.email;
+    session.user.Phone = response.profile.phone;
+    session.user.ProfileImage = response.profile.profileImageUrl;
+    await saveAuthSession(session);
+
+    return response.profile;
+  } catch {
+    return getProfileFromAuthSession(session);
   }
-
-  // Sync to local session
-  session.user.UserName = response.profile.userName;
-  session.user.Email = response.profile.email;
-  session.user.Phone = response.profile.phone;
-  session.user.ProfileImage = response.profile.profileImageUrl;
-  await saveAuthSession(session);
-
-  return response.profile;
 };
 
 export const updateEmployeeProfile = async (

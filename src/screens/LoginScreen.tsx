@@ -22,16 +22,17 @@ import { Typography } from '../theme/typography';
 import PrimaryButton from '../components/PrimaryButton';
 import { loginWithCredentials } from '../services/auth';
 import { ApiError } from '../services/apiClient';
+import { COMPANY } from '../config/company';
 
 const LoginScreen = ({ navigation }: any) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(COMPANY.defaultUser.email);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Focus states
-  const [isUsernameFocused, setIsUsernameFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   const handleLogin = async () => {
@@ -41,14 +42,14 @@ const LoginScreen = ({ navigation }: any) => {
 
     try {
       await loginWithCredentials({
-        UserName: username,
+        Email: email,
         Password: password,
       });
 
       Toast.show({
         type: 'success',
         text1: 'Login Successful',
-        text2: 'Welcome back to XONE!',
+        text2: `Welcome back to ${COMPANY.displayName}!`,
         position: 'top',
         topOffset: 60,
       });
@@ -82,7 +83,7 @@ const LoginScreen = ({ navigation }: any) => {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.brand}>XONE</Text>
+          <Text style={styles.brand}>{COMPANY.displayName}</Text>
           <Text style={styles.headerSubtitle}>Sign in to mark attendance and view your records.</Text>
         </SafeAreaView>
 
@@ -101,27 +102,28 @@ const LoginScreen = ({ navigation }: any) => {
               <Text style={styles.formSubtitle}>Use your account credentials to continue.</Text>
 
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, isUsernameFocused && styles.fieldLabelFocused]}>Username</Text>
+                <Text style={[styles.fieldLabel, isEmailFocused && styles.fieldLabelFocused]}>Email</Text>
                 <View
                   style={[
                     styles.inputRow,
-                    isUsernameFocused && styles.inputRowFocused,
+                    isEmailFocused && styles.inputRowFocused,
                   ]}
                 >
                   <Ionicons
-                    name="person-outline"
+                    name="mail-outline"
                     size={20}
-                    color={isUsernameFocused ? Colors.primary : Colors.textMuted}
+                    color={isEmailFocused ? Colors.primary : Colors.textMuted}
                   />
                   <TextInput
-                    placeholder="Enter your username"
+                    placeholder="Enter your email"
                     placeholderTextColor={Colors.textMuted}
-                    value={username}
-                    onChangeText={setUsername}
+                    value={email}
+                    onChangeText={setEmail}
                     autoCapitalize="none"
                     autoCorrect={false}
-                    onFocus={() => setIsUsernameFocused(true)}
-                    onBlur={() => setIsUsernameFocused(false)}
+                    keyboardType="email-address"
+                    onFocus={() => setIsEmailFocused(true)}
+                    onBlur={() => setIsEmailFocused(false)}
                     style={styles.input}
                   />
                 </View>
