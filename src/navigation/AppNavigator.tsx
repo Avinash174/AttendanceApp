@@ -1,0 +1,119 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text, Platform, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import LoginScreen from '../screens/LoginScreen';
+import AttendanceScreen from '../screens/AttendanceScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import SplashScreen from '../screens/SplashScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import PersonalDetailsScreen from '../screens/PersonalDetailsScreen';
+import MyAttendanceScreen from '../screens/MyAttendanceScreen';
+import AccountSettingsScreen from '../screens/AccountSettingsScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import { LiveLocationProvider } from '../context/LiveLocationContext';
+import { Colors, Theme } from '../theme/colors';
+import { Typography } from '../theme/typography';
+import { moderateScale } from '../utils/responsive';
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const MainTabs = () => {
+  return (
+    <LiveLocationProvider>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: styles.tabBar,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarItemStyle: styles.tabItem,
+      }}
+    >
+      <Tab.Screen
+        name="Attendance"
+        component={AttendanceScreen}
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'home' : 'home-outline'}
+              size={moderateScale(22)}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'person' : 'person-outline'}
+              size={moderateScale(22)}
+              color={color}
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+    </LiveLocationProvider>
+  );
+};
+
+const AppNavigator = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+        <Stack.Screen name="PersonalDetails" component={PersonalDetailsScreen} />
+        <Stack.Screen name="MyAttendance" component={MyAttendanceScreen} />
+        <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+const styles = StyleSheet.create({
+  tabBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === 'ios' ? 88 : 64,
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+    elevation: 8,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+    paddingTop: 8,
+  },
+  tabItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabLabel: {
+    ...Typography.label,
+    fontSize: moderateScale(10),
+    fontWeight: '700',
+    marginTop: 4,
+  },
+});
+
+export default AppNavigator;
