@@ -1,7 +1,10 @@
 import Toast from 'react-native-toast-message';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Font from 'expo-font';
 import AppNavigator from './src/navigation/AppNavigator';
+import ioniconsFont from './assets/fonts/ionicons.ttf';
 import {
   useFonts,
   Outfit_400Regular,
@@ -22,14 +25,20 @@ function App() {
     Outfit_900Black,
   });
 
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      Font.loadAsync({ Ionicons: ioniconsFont }).catch(console.warn);
+    }
+  }, []);
+
   if (!fontsLoaded && !fontError) {
-    return null; // Keep blank while loading
+    return null;
   }
 
   return (
     <SafeAreaProvider>
       <AppNavigator />
-        <Toast />
+      <Toast />
     </SafeAreaProvider>
   );
 }

@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '../icons/Ionicons';
 import { Colors, Theme } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { moderateScale } from '../utils/responsive';

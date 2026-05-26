@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StatusBar, StyleSheet, Alert,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '../icons/Ionicons';
 import MapView, { Circle, Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { getDistance } from 'geolib';
 import { Colors, Theme } from '../theme/colors';

@@ -3,9 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "expo run:android",
+    "android": "npm run sync:fonts && expo run:android",
     "ios": "expo run:ios",
     "lint": "eslint .",
+    "postinstall": "npm run sync:fonts",
+    "sync:fonts": "mkdir -p assets/fonts android/app/src/main/assets/fonts && cp node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf assets/fonts/ionicons.ttf && cp assets/fonts/ionicons.ttf android/app/src/main/assets/fonts/ionicons.ttf",
     "start": "expo start",
     "start:reset": "expo start -c",
     "test": "jest"
