@@ -24,6 +24,7 @@ import {
   getGeolocations,
 } from '../services/attendance';
 import { getAuthSession } from '../services/auth';
+import { COMPANY } from '../config/company';
 
 type RecentLog = {
   id: string;
@@ -130,7 +131,7 @@ const AttendanceScreen = () => {
   const [status, setStatus] = useState<'IN' | 'OUT'>('OUT');
   const [isVerifying, setIsVerifying] = useState(false);
   const [employeeAddress, setEmployeeAddress] = useState<string | null>('Locating...');
-  const [officeAddress, setOfficeAddress] = useState<string | null>('Kamdenu, Sector 15, Kopar Khairane, Navi Mumbai');
+  const [officeAddress, setOfficeAddress] = useState<string | null>(COMPANY.office.address);
   const [employeeName, setEmployeeName] = useState('Employee');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -141,19 +142,26 @@ const AttendanceScreen = () => {
     latitudeDelta: number;
     longitudeDelta: number;
   } | null>({
-    latitude: kamdenuLat,
-    longitude: kamdenuLng,
+    latitude: COMPANY.office.latitude,
+    longitude: COMPANY.office.longitude,
     latitudeDelta: 0.005,
     longitudeDelta: 0.005,
   });
-  const [officeRadius, setOfficeRadius] = useState<number>(25);
-  const [officeName, setOfficeName] = useState<string>('Kamdenu');
+  const [officeRadius, setOfficeRadius] = useState<number>(COMPANY.office.radiusMeters);
+  const [officeName, setOfficeName] = useState<string>(COMPANY.office.name);
   const [geolocationsList, setGeolocationsList] = useState<any[]>([
-    { pkGeoId: 101, OfficeName: 'Kamdenu', Latitude: kamdenuLat, Longitude: kamdenuLng, RadiusMeters: 25, IsActive: true },
+    {
+      pkGeoId: COMPANY.office.id,
+      OfficeName: COMPANY.office.name,
+      Latitude: COMPANY.office.latitude,
+      Longitude: COMPANY.office.longitude,
+      RadiusMeters: COMPANY.office.radiusMeters,
+      IsActive: true,
+    },
     { pkGeoId: 102, OfficeName: 'Koparkhairne', Latitude: koparkhairneLat, Longitude: koparkhairneLng, RadiusMeters: 25, IsActive: false },
     { pkGeoId: 103, OfficeName: 'Texto', Latitude: textoLat, Longitude: textoLng, RadiusMeters: 25, IsActive: false },
   ]);
-  const [selectedGeoId, setSelectedGeoId] = useState<number | null>(101);
+  const [selectedGeoId, setSelectedGeoId] = useState<number | null>(COMPANY.office.id);
 
   const {
     employeeLocation,

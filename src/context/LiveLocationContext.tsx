@@ -10,6 +10,7 @@ import { useOfficeDistance } from '../hooks/useOfficeDistance';
 import { useLiveLocationPing } from '../hooks/useLiveLocationPing';
 import { getAuthSession } from '../services/auth';
 import { getLiveLocationConfig } from '../services/attendance';
+import { COMPANY } from '../config/company';
 
 const DEFAULT_PING_MS = 15000;
 
@@ -34,8 +35,8 @@ const LiveLocationContext = createContext<LiveLocationContextValue | null>(null)
 
 export const LiveLocationProvider = ({ children }: { children: ReactNode }) => {
   const [officeLocation, setOfficeLocation] = useState<Coordinates | null>({
-    latitude: 19.096388750705227,
-    longitude: 73.01687580932347,
+    latitude: COMPANY.office.latitude,
+    longitude: COMPANY.office.longitude,
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [pingIntervalMs, setPingIntervalMs] = useState(DEFAULT_PING_MS);
