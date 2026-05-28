@@ -25,7 +25,7 @@ import { ApiError } from '../services/apiClient';
 import { COMPANY } from '../config/company';
 
 const LoginScreen = ({ navigation }: any) => {
-  const [email, setEmail] = useState(COMPANY.defaultUser.email);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -102,7 +102,9 @@ const LoginScreen = ({ navigation }: any) => {
               <Text style={styles.formSubtitle}>Use your account credentials to continue.</Text>
 
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, isEmailFocused && styles.fieldLabelFocused]}>Email</Text>
+                <Text style={[styles.fieldLabel, isEmailFocused && styles.fieldLabelFocused]}>
+                  Email / Username / Mobile
+                </Text>
                 <View
                   style={[
                     styles.inputRow,
@@ -110,18 +112,18 @@ const LoginScreen = ({ navigation }: any) => {
                   ]}
                 >
                   <Ionicons
-                    name="mail-outline"
+                    name="person-outline"
                     size={20}
                     color={isEmailFocused ? Colors.primary : Colors.textMuted}
                   />
                   <TextInput
-                    placeholder="Enter your email"
+                    placeholder="Email, username, or mobile"
                     placeholderTextColor={Colors.textMuted}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
                     autoCorrect={false}
-                    keyboardType="email-address"
+                    keyboardType="default"
                     onFocus={() => setIsEmailFocused(true)}
                     onBlur={() => setIsEmailFocused(false)}
                     style={styles.input}

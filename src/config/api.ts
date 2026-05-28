@@ -11,5 +11,8 @@ export const API_ENDPOINTS = {
   profileImage: '/api/profile/image',
   config: '/attendance/config',
   geolocations: '/api/hrm/admin/hl-geolocations',
+  leaveApply: '/api/leave/apply',
+  leaveHistory: '/api/leave/history',
+  leaveTypes: '/api/leave/types',
 };
 

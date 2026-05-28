@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../config/api';
 import { logApiError, logApiRequest, logApiResponse } from './logger';
+import { isUnauthorizedError, notifySessionExpired } from './sessionManager';
 
 type ApiRequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -106,6 +107,11 @@ export const apiRequest = async <T>(
     if (!response.ok) {
       const message = getErrorMessage(response.status, responseBody);
       logApiError(url, message, responseBody);
+
+      if (token && isUnauthorizedError(response.status, message)) {
+        void notifySessionExpired();
+      }
+
       throw new ApiError(message, response.status, responseBody);
     }
 

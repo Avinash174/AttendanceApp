@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { AppState, AppStateStatus } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -13,8 +14,13 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import PersonalDetailsScreen from '../screens/PersonalDetailsScreen';
 import MyAttendanceScreen from '../screens/MyAttendanceScreen';
 import AccountSettingsScreen from '../screens/AccountSettingsScreen';
+import ApplyLeaveScreen from '../screens/ApplyLeaveScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import { LiveLocationProvider } from '../context/LiveLocationContext';
+import { clearAuthSession, getAuthSession } from '../services/auth';
+import { setSessionExpiredHandler } from '../services/sessionManager';
+import { navigationRef } from './navigationRef';
+import Toast from 'react-native-toast-message';
 import { Colors, Theme } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { moderateScale } from '../utils/responsive';
@@ -70,8 +76,35 @@ const MainTabs = () => {
 };
 
 const AppNavigator = () => {
+  useEffect(() => {
+    setSessionExpiredHandler(async () => {
+      await clearAuthSession();
+      Toast.show({
+        type: 'info',
+        text1: 'Session expired',
+        text2: 'Please sign in again.',
+        position: 'top',
+        topOffset: 60,
+      });
+    });
+
+    const checkSessionOnForeground = async (state: AppStateStatus) => {
+      if (state !== 'active') {
+        return;
+      }
+
+      await getAuthSession();
+    };
+
+    const subscription = AppState.addEventListener('change', checkSessionOnForeground);
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
@@ -80,6 +113,7 @@ const AppNavigator = () => {
         <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen name="PersonalDetails" component={PersonalDetailsScreen} />
         <Stack.Screen name="MyAttendance" component={MyAttendanceScreen} />
+        <Stack.Screen name="ApplyLeave" component={ApplyLeaveScreen} />
         <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>

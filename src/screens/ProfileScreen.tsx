@@ -54,6 +54,13 @@ const menuItems = [
   },
 
   {
+    id: '3',
+    title: 'Apply leave',
+    subtitle: 'Request time off and track status',
+    icon: 'calendar-clear-outline',
+    route: 'ApplyLeave',
+  },
+  {
     id: '4',
     title: 'Account settings',
     subtitle: 'Security and preferences',

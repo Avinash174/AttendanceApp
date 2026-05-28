@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '../config/api';
 import { AuthSession, AuthUser, LoginCredentials, LoginResponse } from '../types/auth';
 import { apiRequest, ApiError } from './apiClient';
 import { logApiError } from './logger';
+import { isTokenExpired } from './sessionManager';
 
 const AUTH_SESSION_KEY = '@attendance/auth-session';
 
@@ -84,6 +85,11 @@ export const getAuthSession = async (): Promise<AuthSession | null> => {
       return null;
     }
 
+    if (isTokenExpired(session.token)) {
+      await clearAuthSession();
+      return null;
+    }
+
     return session;
   } catch (error) {
     logApiError('auth-session', 'Failed to parse stored session', error);
@@ -116,15 +122,18 @@ export const loginWithCredentials = async (
   const password = credentials.Password.trim();
 
   if (!email || !password) {
-    throw new ApiError('Enter both email and password.');
+    throw new ApiError('Enter your email/username/mobile and password.');
   }
 
   const normalized = email.replace(/\s/g, '');
   const isMobileLogin = /^\+?\d{10,15}$/.test(normalized);
+  const isEmailLogin = normalized.includes('@');
 
   const body = isMobileLogin
     ? { mobile: normalized, password }
-    : { email: normalized, password };
+    : isEmailLogin
+      ? { email: normalized, password }
+      : { username: normalized, password };
 
   try {
     const response = await apiRequest<LoginResponse>(API_ENDPOINTS.login, {
