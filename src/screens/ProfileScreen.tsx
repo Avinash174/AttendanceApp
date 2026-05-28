@@ -52,13 +52,12 @@ const menuItems = [
     icon: 'calendar-outline',
     route: 'MyAttendance',
   },
-
   {
     id: '3',
-    title: 'Apply leave',
-    subtitle: 'Request time off and track status',
+    title: 'My leave',
+    subtitle: 'Leave history and request status',
     icon: 'calendar-clear-outline',
-    route: 'ApplyLeave',
+    route: 'MyLeave',
   },
   {
     id: '4',

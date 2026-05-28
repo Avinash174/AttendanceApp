@@ -7,6 +7,7 @@ type ApiRequestOptions = {
   body?: unknown;
   headers?: Record<string, string>;
   token?: string;
+  quiet?: boolean;
 };
 
 export class ApiError extends Error {
@@ -62,7 +63,7 @@ const REQUEST_TIMEOUT_MS = 10000;
 
 export const apiRequest = async <T>(
   path: string,
-  { method = 'GET', body, headers = {}, token }: ApiRequestOptions = {},
+  { method = 'GET', body, headers = {}, token, quiet = false }: ApiRequestOptions = {},
 ): Promise<T> => {
   ensureBaseUrl();
 
@@ -106,7 +107,9 @@ export const apiRequest = async <T>(
 
     if (!response.ok) {
       const message = getErrorMessage(response.status, responseBody);
-      logApiError(url, message, responseBody);
+      if (!quiet) {
+        logApiError(url, message, responseBody);
+      }
 
       if (token && isUnauthorizedError(response.status, message)) {
         void notifySessionExpired();

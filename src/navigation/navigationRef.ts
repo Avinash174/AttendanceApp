@@ -8,6 +8,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   PersonalDetails: undefined;
   MyAttendance: undefined;
+  MyLeave: undefined;
   ApplyLeave: undefined;
   AccountSettings: undefined;
 };

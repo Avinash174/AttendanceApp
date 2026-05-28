@@ -9,10 +9,12 @@ import Ionicons from '../icons/Ionicons';
 import LoginScreen from '../screens/LoginScreen';
 import AttendanceScreen from '../screens/AttendanceScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import LeaveScreen from '../screens/LeaveScreen';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import PersonalDetailsScreen from '../screens/PersonalDetailsScreen';
 import MyAttendanceScreen from '../screens/MyAttendanceScreen';
+import MyLeaveScreen from '../screens/MyLeaveScreen';
 import AccountSettingsScreen from '../screens/AccountSettingsScreen';
 import ApplyLeaveScreen from '../screens/ApplyLeaveScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
@@ -50,6 +52,20 @@ const MainTabs = () => {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
+              size={moderateScale(22)}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Leave"
+        component={LeaveScreen}
+        options={{
+          tabBarLabel: 'Leave',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'calendar' : 'calendar-outline'}
               size={moderateScale(22)}
               color={color}
             />
@@ -113,6 +129,7 @@ const AppNavigator = () => {
         <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen name="PersonalDetails" component={PersonalDetailsScreen} />
         <Stack.Screen name="MyAttendance" component={MyAttendanceScreen} />
+        <Stack.Screen name="MyLeave" component={MyLeaveScreen} />
         <Stack.Screen name="ApplyLeave" component={ApplyLeaveScreen} />
         <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
       </Stack.Navigator>
